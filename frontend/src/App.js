@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
@@ -14,7 +14,6 @@ import ShelfDetail from './components/shelves/ShelfDetail';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 
-// Create theme
 const theme = createTheme({
   palette: {
     primary: {
@@ -26,6 +25,12 @@ const theme = createTheme({
   },
 });
 
+// PrivateRoute component
+function PrivateRoute({ children }) {
+  const isAuthenticated = !!localStorage.getItem('token');
+  return isAuthenticated ? children : <Navigate to="/login" />;
+}
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -34,13 +39,35 @@ function App() {
         <div className="App">
           <Navigation />
           <Routes>
-            <Route path="/" element={<BookList />} />
-            <Route path="/search" element={<BookSearch />} />
-            <Route path="/books/:id" element={<BookDetail />} />
-            <Route path="/shelves" element={<ShelfList />} />
-            <Route path="/shelves/:id" element={<ShelfDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            
+            {/* Protected Routes */}
+            <Route path="/" element={
+              <PrivateRoute>
+                <BookList />
+              </PrivateRoute>
+            } />
+            <Route path="/search" element={
+              <PrivateRoute>
+                <BookSearch />
+              </PrivateRoute>
+            } />
+            <Route path="/books/:id" element={
+              <PrivateRoute>
+                <BookDetail />
+              </PrivateRoute>
+            } />
+            <Route path="/shelves" element={
+              <PrivateRoute>
+                <ShelfList />
+              </PrivateRoute>
+            } />
+            <Route path="/shelves/:id" element={
+              <PrivateRoute>
+                <ShelfDetail />
+              </PrivateRoute>
+            } />
           </Routes>
         </div>
       </Router>
