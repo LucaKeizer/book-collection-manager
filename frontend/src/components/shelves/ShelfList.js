@@ -36,7 +36,7 @@ function ShelfList() {
 
   useEffect(() => {
     fetchShelves();
-  }, []);
+  }, [fetchShelves]);
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });

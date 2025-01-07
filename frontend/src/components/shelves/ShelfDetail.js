@@ -1,5 +1,5 @@
 // src/components/shelves/ShelfDetail.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -23,7 +23,7 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   Divider,
-  Paper
+  Backdrop
 } from '@mui/material';
 import { 
   ArrowBack as ArrowBackIcon,
@@ -35,6 +35,8 @@ import api from '../../services/api';
 function ShelfDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  
+  // State management
   const [shelf, setShelf] = useState(null);
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,19 +46,15 @@ function ShelfDetail() {
   const [addBookDialogOpen, setAddBookDialogOpen] = useState(false);
   const [availableBooks, setAvailableBooks] = useState([]);
 
-  useEffect(() => {
-    fetchShelfData();
-  }, [id]);
-
-  const showSnackbar = (message, severity = 'success') => {
+  const showSnackbar = useCallback((message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
-  };
+  }, []);
 
-  const handleSnackbarClose = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
+  const handleSnackbarClose = useCallback(() => {
+    setSnackbar(prev => ({ ...prev, open: false }));
+  }, []);
 
-  const fetchShelfData = async () => {
+  const fetchShelfData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -76,12 +74,15 @@ function ShelfDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate]);
 
-  const handleOpenAddBookDialog = async () => {
+  useEffect(() => {
+    fetchShelfData();
+  }, [fetchShelfData]);
+
+  const handleOpenAddBookDialog = useCallback(async () => {
     setActionLoading(true);
     try {
-      // Fetch user's books that aren't in this shelf
       const response = await api.get('/api/userbooks/');
       const shelfBookIds = new Set(books.map(book => book.id));
       const availableBooks = response.data.filter(book => !shelfBookIds.has(book.id));
@@ -92,38 +93,38 @@ function ShelfDetail() {
     } finally {
       setActionLoading(false);
     }
-  };
+  }, [books, showSnackbar]);
 
-  const handleAddBookToShelf = async (bookId) => {
+  const handleAddBookToShelf = useCallback(async (bookId) => {
     setActionLoading(true);
     try {
       await api.post(`/api/userbooks/${bookId}/shelves/`, {
         shelf_id: id
       });
       showSnackbar('Book added to shelf successfully');
-      fetchShelfData();
+      await fetchShelfData();
       setAddBookDialogOpen(false);
     } catch (error) {
       showSnackbar('Failed to add book to shelf', 'error');
     } finally {
       setActionLoading(false);
     }
-  };
+  }, [id, showSnackbar, fetchShelfData]);
 
-  const handleRemoveBookFromShelf = async (bookId) => {
+  const handleRemoveBookFromShelf = useCallback(async (bookId) => {
     if (!window.confirm('Are you sure you want to remove this book from the shelf?')) return;
 
     setActionLoading(true);
     try {
       await api.delete(`/api/userbooks/${bookId}/shelves/${id}/`);
       showSnackbar('Book removed from shelf successfully');
-      fetchShelfData();
+      await fetchShelfData();
     } catch (error) {
       showSnackbar('Failed to remove book from shelf', 'error');
     } finally {
       setActionLoading(false);
     }
-  };
+  }, [id, showSnackbar, fetchShelfData]);
 
   if (loading) {
     return (

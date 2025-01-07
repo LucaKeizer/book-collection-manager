@@ -54,7 +54,7 @@ function BookDetail() {
 
   useEffect(() => {
     fetchBookData();
-  }, [id]);
+  }, [fetchBookData]); // Add fetchBookData to dependencies  
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });

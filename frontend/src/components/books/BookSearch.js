@@ -16,7 +16,6 @@ import {
   Snackbar,
   CircularProgress,
   Backdrop,
-  IconButton
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 import api from '../../services/api';

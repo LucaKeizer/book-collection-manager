@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'books',
+    'rest_framework.authtoken',
 ]
 
 ROOT_URLCONF = 'backend.urls'

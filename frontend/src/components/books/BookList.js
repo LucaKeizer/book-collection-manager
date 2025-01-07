@@ -19,11 +19,9 @@ import {
   Snackbar,
   CircularProgress,
   Backdrop,
-  IconButton,
   Skeleton,
-  Tooltip
 } from '@mui/material';
-import { Search as SearchIcon, Add as AddIcon } from '@mui/icons-material';
+import { Add as AddIcon } from '@mui/icons-material';
 import api from '../../services/api';
 
 function BookList() {
@@ -36,7 +34,7 @@ function BookList() {
 
   useEffect(() => {
     fetchBooks();
-  }, []);
+  }, [fetchBooks]);
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
