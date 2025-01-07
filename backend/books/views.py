@@ -10,6 +10,7 @@ from .serializers import (
     ReadingSessionSerializer, NoteSerializer, ReviewSerializer,
     QuoteSerializer
 )
+from .services import GoogleBooksService  # Add this line
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
