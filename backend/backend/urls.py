@@ -22,9 +22,11 @@ def register(request):
         if User.objects.filter(email=email).exists():
             return Response({'email': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Create user and generate token
+        # Create user
         user = User.objects.create_user(username=username, email=email, password=password)
-        token, _ = Token.objects.create(user=user)
+        
+        # Create token properly
+        token = Token.objects.create(user=user)
         
         # Return token with success message
         return Response({
@@ -33,18 +35,19 @@ def register(request):
         }, status=status.HTTP_201_CREATED)
         
     except Exception as e:
+        print(f"Registration error: {str(e)}")  # Debug print
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login(request):
-    username = request.data.get('username')
+    email = request.data.get('email')
     password = request.data.get('password')
     
     try:
-        user = User.objects.get(username=username)
+        user = User.objects.get(email=email)
     except User.DoesNotExist:
-        return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'No account found with this email'}, status=status.HTTP_404_NOT_FOUND)
     
     if not user.check_password(password):
         return Response({'message': 'Invalid password'}, status=status.HTTP_400_BAD_REQUEST)
@@ -56,6 +59,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('books.urls')),
     path('api/auth/', include('rest_framework.urls')),
-    path('api/auth/login/', login),  # Use our custom login view
+    path('api/auth/login/', login),
     path('api/auth/register/', register),
 ]
