@@ -18,6 +18,20 @@ class BookViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ['title', 'authors']
 
+    @action(detail=False, methods=['get'])
+    def search_google_books(self, request):
+        query = request.query_params.get('q', '')
+        max_results = int(request.query_params.get('max_results', 10))
+        
+        if not query:
+            return Response(
+                {'error': 'Search query is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        books = GoogleBooksService.search_books(query, max_results)
+        return Response(books)
+
     @action(detail=True, methods=['post'])
     def add_to_collection(self, request, pk=None):
         book = self.get_object()
